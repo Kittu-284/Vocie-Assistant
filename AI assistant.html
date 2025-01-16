@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Voice Assistant</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        img{
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            margin-left: 10px;
+            scroll-margin-top: 10px;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #3498db;
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        #stop-btn {
+            background: #e74c3c;
+            display: none;
+        }
+
+        #response {
+            font-size: 18px;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            min-height: 60px;
+        }
+
+        .listening {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #bdc3c7;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .status-indicator.active {
+            background: #2ecc71;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span class="status-indicator"></span>Voice Assistant</h1>
+        <div class="button-container">
+            <button id="start-btn">Start Listening<img src="mic.png" alt="Microphone" /></button>
+            <button id="stop-btn">Stop Listening<img src="mic2.png" alt="Microphone" /></button>
+        </div>
+        <p id="response">Say "help" to see what I can do</p>
+    </div>
+
+    <script>
+        const recognition = new webkitSpeechRecognition();
+        recognition.continuous = true;
+        recognition.lang = 'en-US';
+
+        const startButton = document.getElementById('start-btn');
+        const stopButton = document.getElementById('stop-btn');
+        const responseText = document.getElementById('response');
+        const container = document.querySelector('.container');
+        const statusIndicator = document.querySelector('.status-indicator');
+        let isListening = false;
+
+        startButton.addEventListener('click', startListening);
+        stopButton.addEventListener('click', stopListening);
+
+        function startListening() {
+            try {
+                recognition.start();
+                isListening = true;
+                updateUI(true);
+            } catch (error) {
+                console.error('Error starting recognition:', error);
+                responseText.textContent = "There was an error starting the voice recognition. Please try again.";
+            }
+        }
+
+        function stopListening() {
+            recognition.stop();
+            isListening = false;
+            updateUI(false);
+        }
+
+        function updateUI(listening) {
+            startButton.style.display = listening ? 'none' : 'block';
+            stopButton.style.display = listening ? 'block' : 'none';
+            container.classList.toggle('listening', listening);
+            statusIndicator.classList.toggle('active', listening);
+        }
+
+        recognition.onend = () => {
+            if (isListening) {
+                recognition.start();
+            }
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Recognition error:', event.error);
+            responseText.textContent = `Error: ${event.error}. Please try again.`;
+            stopListening();
+        };
+
+        recognition.onresult = (event) => {
+            const result = event.results[event.results.length - 1][0].transcript.toLowerCase();
+            processCommand(result);
+        };
+
+        function processCommand(command) {
+            let response = "I'm sorry, I didn't understand that command. Say 'help' to see what I can do.";
+
+            if (command.includes("hello") || command.includes("hi")) {
+                response = "Hello! How can I help you today?";
+            } else if (command.includes("what is your name")) {
+                response = "My name is Voice Assistant, your friendly AI companion!";
+            } else if (command.includes("how are you")) {
+                response = "I'm functioning perfectly, thank you! How can I assist you today?";
+            } else if (command.includes("help") || command.includes("what can you do")) {
+                response = "Here's what I can do:\n" +
+                    "• Say 'hello' or 'hi' for a greeting\n" +
+                    "• Ask 'what is your name'\n" +
+                    "• Ask 'how are you'\n" +
+                    "• Say 'time' for current time\n" +
+                    "• Say 'goodbye' or 'bye' to exit";
+            } else if (command.includes("time") || command.includes("what time is it")) {
+                response = new Date().toLocaleTimeString();
+            } else if (command.includes("goodbye") || command.includes("bye")) {
+                response = "Goodbye! Have a wonderful day!";
+                setTimeout(() => {
+                    stopListening();
+                }, 1000);
+                setTimeout(() => {
+                    window.close();
+                }, 2500);
+            }
+
+            responseText.textContent = response;
+        }
+    </script>
+</body>
+</html>
