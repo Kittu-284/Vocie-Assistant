@@ -106,8 +106,8 @@
     <div class="container">
         <h1><span class="status-indicator"></span>Voice Assistant</h1>
         <div class="button-container">
-            <button id="start-btn">Start Listening<img src="mic.png" alt="Microphone" /></button>
-            <button id="stop-btn">Stop Listening<img src="mic2.png" alt="Microphone" /></button>
+            <button id="start-btn">Start Listening<img src="https://static.vecteezy.com/system/resources/previews/000/420/512/non_2x/microphone-icon-vector-illustration.jpg" alt="Microphone" /></button>
+            <button id="stop-btn">Stop Listening<img src="https://i.pinimg.com/736x/fe/82/35/fe8235de3e612195875d2cb3ebf63e80.jpg" alt="Microphone" /></button>
         </div>
         <p id="response">Say "help" to see what I can do</p>
     </div>
@@ -183,9 +183,24 @@
                     "• Ask 'what is your name'\n" +
                     "• Ask 'how are you'\n" +
                     "• Say 'time' for current time\n" +
+                    "• Say 'open youtube' or 'youtube'\n" +
+                    "• Say 'open google' or 'google'\n" +
                     "• Say 'goodbye' or 'bye' to exit";
             } else if (command.includes("time") || command.includes("what time is it")) {
                 response = new Date().toLocaleTimeString();
+            } else if (command.includes("open youtube") || command.includes("youtube")) {
+                response = "Opening YouTube...";  
+                stopListening(); 
+                setTimeout(() => {
+                    window.open("https://www.youtube.com", "_blank");
+                }, 1500);
+
+            } else if (command.includes("open google") || command.includes("google")) {
+                response = "Opening Google...";  
+                stopListening();
+                setTimeout(() => {
+                    window.open("https://www.google.com", "_blank");
+                }, 1500);
             } else if (command.includes("goodbye") || command.includes("bye")) {
                 response = "Goodbye! Have a wonderful day!";
                 setTimeout(() => {
@@ -195,7 +210,7 @@
                     window.close();
                 }, 2500);
             }
-
+            
             responseText.textContent = response;
         }
     </script>
